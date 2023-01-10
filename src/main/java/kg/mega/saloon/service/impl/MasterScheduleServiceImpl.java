@@ -64,6 +64,9 @@ public class MasterScheduleServiceImpl implements MasterScheduleService {
 
     @Override
     public Map<WorkDayEnum, String> getSched(Long masterId) {
+        MasterDto masterDto=masterService.findById(masterId);
+
+
         return null;
     }
 }

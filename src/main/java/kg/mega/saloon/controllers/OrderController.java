@@ -4,6 +4,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import kg.mega.saloon.models.dto.MasterDto;
 import kg.mega.saloon.models.dto.OrderDto;
+import kg.mega.saloon.models.requests.SaveMasterRequest;
+import kg.mega.saloon.models.requests.SaveOrderRequest;
 import kg.mega.saloon.service.MasterService;
 import kg.mega.saloon.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,15 @@ public class OrderController {
     ResponseEntity<?> save(@RequestBody OrderDto order) {
         try {
             return new ResponseEntity<>(service.save(order), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PostMapping("/create")
+    ResponseEntity<?>create(@ModelAttribute SaveOrderRequest orderRequest){
+        try {
+            return new ResponseEntity<>(service.create(orderRequest), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

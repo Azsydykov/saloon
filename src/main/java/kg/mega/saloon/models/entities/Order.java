@@ -39,8 +39,9 @@ public class Order {
     @PrePersist
     protected void onCreate() {
         status = OrderStatusEnum.CONFIRM;
+        addDate = new Date();
         updateDate = new Date();
-      //  appointment_date = new Date();
+        appointment_date = new Date();
         active = true;
     }
 }

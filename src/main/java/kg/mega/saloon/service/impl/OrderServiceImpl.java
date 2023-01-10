@@ -5,7 +5,10 @@ import kg.mega.saloon.mappers.ClientMapper;
 import kg.mega.saloon.mappers.MasterMapper;
 import kg.mega.saloon.mappers.OrderMapper;
 import kg.mega.saloon.models.dto.ClientDto;
+import kg.mega.saloon.models.dto.MasterDto;
 import kg.mega.saloon.models.dto.OrderDto;
+import kg.mega.saloon.models.dto.SaloonDto;
+import kg.mega.saloon.models.requests.SaveOrderRequest;
 import kg.mega.saloon.network.EmailSender;
 import kg.mega.saloon.service.ClientService;
 import kg.mega.saloon.service.EmailSenderService;
@@ -35,31 +38,44 @@ public class OrderServiceImpl implements OrderService {
     private ClientService clientService;
 
     @Autowired
+    private MasterService masterService;
+
+    @Autowired
     private EmailSenderService emailSenderService;
 
 
     @Override
     public OrderDto save(OrderDto order) {
+        return mapper.toDto(rep.save(mapper.toEntity(order)));
+    }
+
+    @Override
+    public OrderDto create(SaveOrderRequest order) {
+
         ClientDto client = new ClientDto();
-        client.setName(order.getClient().getName());
-        client.setSurname(order.getClient().getSurname());
-        client.setPhoneNumber(order.getClient().getPhoneNumber());
-        client.setEmail(order.getClient().getEmail());
-        client = clientService.save(client);
-        order.setClient(client);
+        MasterDto masterDto = masterService.findById(order.getMasterId());
+        OrderDto orderDto = new OrderDto();
+        client.setName(order.getClientDto().getName());
+        client.setSurname(order.getClientDto().getSurname());
+        client.setPhoneNumber(order.getClientDto().getPhoneNumber());
+        client.setEmail(order.getClientDto().getEmail());
+
+        client = clientService.save(order.getClientDto());
+        orderDto.setClient(client);
+        orderDto.setMaster(masterDto);
 
         if (client.getName().isEmpty() | client.getPhoneNumber().isEmpty()) {
             throw new RuntimeException("Имя или номер телефона не может быть пустым!");
         }
         try {
-            emailSenderService.emailSender(order.getClient().getEmail());
+            emailSenderService.emailSender(orderDto.getClient().getEmail());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
             e.printStackTrace();
         }
-        return mapper.toDto(rep.save(mapper.toEntity(order)));
 
+        return save(orderDto);
     }
 
     @Override

@@ -29,8 +29,8 @@ public class MasterScheduleController {
     }
 
     @GetMapping("/get")
-    @ApiOperation("Создание")
-    ResponseEntity<?> create(@RequestParam Long masterId) {
+    @ApiOperation("Получение графика по id мастера")
+    ResponseEntity<?> getSchedule(@RequestParam Long masterId) {
 
         try {
             return new ResponseEntity<>(service.getSched(masterId), HttpStatus.CREATED);
