@@ -2,13 +2,17 @@ package kg.mega.saloon.controllers;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import kg.mega.saloon.enums.WorkDayEnum;
 import kg.mega.saloon.models.dto.ScheduleDto;
+import kg.mega.saloon.models.requests.SaveMasterRequest;
+import kg.mega.saloon.models.requests.SaveScheduleRequest;
 import kg.mega.saloon.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @Api(tags = "График")
@@ -30,8 +34,30 @@ public class ScheduleController {
         }
     }
 
+    @PostMapping("/create")
+    @ApiOperation("Создание рабочего графика мастера")
+    ResponseEntity<?>create(@ModelAttribute SaveScheduleRequest scheduleRequest){
+        try {
+            return new ResponseEntity<>(service.create(scheduleRequest), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PostMapping("/create#2")
+    @ApiOperation("Создание рабочего графика мастера")
+    ResponseEntity<?>create1(@RequestParam WorkDayEnum workDayEnum,
+                             @RequestParam (defaultValue = "09:00") Date startTime,
+                             @RequestParam (defaultValue = "18:00") Date endTime){
+        try {
+            return new ResponseEntity<>(service.create1(workDayEnum, startTime, endTime), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
     @GetMapping("/findById")
-    @ApiOperation("Поиск графика по id")
+
     ResponseEntity<?> findById(@RequestParam Long id) {
         try {
             return new ResponseEntity<>(service.findById(id), HttpStatus.FOUND);
@@ -61,6 +87,16 @@ public class ScheduleController {
     ResponseEntity<?> getScheduleByMasterName(@RequestParam String name) {
         try {
             return new ResponseEntity<>(service.getScheduleByMasterName(name), HttpStatus.FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/getScheduleByMasterId")
+    @ApiOperation("Вывод графика по id мастера")
+    ResponseEntity<?> getScheduleByMasterId(@RequestParam Long masterId) {
+        try {
+            return new ResponseEntity<>(service.getScheduleByMasterId(masterId), HttpStatus.FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }

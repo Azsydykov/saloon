@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SaloonDto {
+    @JsonIgnore
     Long id;
     String name;
     String address;

@@ -15,4 +15,5 @@ public class SaveOrderRequest {
 
     ClientDto clientDto;
     Long masterId;
+    Date appointment_date;
 }

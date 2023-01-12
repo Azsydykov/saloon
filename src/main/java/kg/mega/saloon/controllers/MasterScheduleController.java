@@ -2,6 +2,7 @@ package kg.mega.saloon.controllers;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import kg.mega.saloon.models.responses.ScheduleResponse;
 import kg.mega.saloon.service.MasterScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,11 +32,11 @@ public class MasterScheduleController {
     @GetMapping("/get")
     @ApiOperation("Получение графика по id мастера")
     ResponseEntity<?> getSchedule(@RequestParam Long masterId) {
-
         try {
-            return new ResponseEntity<>(service.getSched(masterId), HttpStatus.CREATED);
+            return new ResponseEntity<>(service.getSchedule(masterId), HttpStatus.FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
+
 }

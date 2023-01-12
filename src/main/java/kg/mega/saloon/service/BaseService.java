@@ -1,6 +1,9 @@
 package kg.mega.saloon.service;
 
+import kg.mega.saloon.enums.WorkDayEnum;
+
 import java.util.List;
+import java.util.Map;
 
 public interface BaseService<Z> {
 
@@ -8,5 +11,6 @@ public interface BaseService<Z> {
     Z findById(Long id);
     Z delete(Long id);
     List<Z> findAll();
+
 
 }

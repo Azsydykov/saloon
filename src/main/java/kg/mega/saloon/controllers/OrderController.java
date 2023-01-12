@@ -34,7 +34,7 @@ public class OrderController {
     }
 
     @PostMapping("/create")
-    ResponseEntity<?>create(@ModelAttribute SaveOrderRequest orderRequest){
+    ResponseEntity<?>create(@RequestBody SaveOrderRequest orderRequest){
         try {
             return new ResponseEntity<>(service.create(orderRequest), HttpStatus.CREATED);
         } catch (Exception e) {
