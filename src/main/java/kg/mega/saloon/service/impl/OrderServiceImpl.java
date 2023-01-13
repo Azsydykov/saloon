@@ -24,6 +24,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Properties;
 
@@ -70,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Имя или номер телефона не может быть пустым!");
         }
         try {
-            emailSenderService.emailSender(orderDto.getClient().getEmail(), orderDto.getMaster().getSaloon().getName(),orderDto.getAppointment_date());
+            emailSenderService.emailSender(orderDto.getClient().getEmail(), orderDto.getMaster().getSaloon().getName(),orderDto.getAppointment_date(), orderDto.getClient().getName());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (MessagingException e) {

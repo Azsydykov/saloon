@@ -5,5 +5,5 @@ import java.io.IOException;
 import java.util.Date;
 
 public interface EmailSenderService {
-    void emailSender(String email,String sloonName, Date appointmentDate) throws IOException, MessagingException;
+    void emailSender(String email,String sloonName, Date appointmentDate, String clientName) throws IOException, MessagingException;
 }
