@@ -55,7 +55,6 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public List<ScheduleDto> getScheduleByMasterId(Long id) {
-
         return mapper.toDtos(rep.getScheduleByMasterId(id));
     }
 

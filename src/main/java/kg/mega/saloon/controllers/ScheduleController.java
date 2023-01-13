@@ -4,7 +4,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import kg.mega.saloon.enums.WorkDayEnum;
 import kg.mega.saloon.models.dto.ScheduleDto;
-import kg.mega.saloon.models.requests.SaveMasterRequest;
 import kg.mega.saloon.models.requests.SaveScheduleRequest;
 import kg.mega.saloon.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +44,7 @@ public class ScheduleController {
     }
 
     @PostMapping("/create#2")
-    @ApiOperation("Создание рабочего графика мастера")
+    @ApiOperation("Создание рабочего графика мастера #2")
     ResponseEntity<?>create1(@RequestParam WorkDayEnum workDayEnum,
                              @RequestParam (defaultValue = "09:00") Date startTime,
                              @RequestParam (defaultValue = "18:00") Date endTime){
@@ -57,7 +56,7 @@ public class ScheduleController {
     }
 
     @GetMapping("/findById")
-
+    @ApiOperation("Вывод графика по id")
     ResponseEntity<?> findById(@RequestParam Long id) {
         try {
             return new ResponseEntity<>(service.findById(id), HttpStatus.FOUND);
@@ -67,7 +66,7 @@ public class ScheduleController {
     }
 
     @GetMapping("/findAll")
-    @ApiOperation("Вывод всего графика")
+    @ApiOperation("Вывод всех графиков")
     ResponseEntity<List<ScheduleDto>> findAll() {
         return ResponseEntity.ok(service.findAll());
     }

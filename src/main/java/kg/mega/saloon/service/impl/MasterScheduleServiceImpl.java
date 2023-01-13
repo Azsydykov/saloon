@@ -25,12 +25,13 @@ public class MasterScheduleServiceImpl implements MasterScheduleService {
     private final MasterService masterService;
     private final ScheduleService scheduleService;
 
-    public MasterScheduleServiceImpl(MasterScheduleRep rep, MasterService masterService, ScheduleService service) {
+
+    public MasterScheduleServiceImpl(MasterScheduleRep rep, MasterService masterService, ScheduleService scheduleService) {
         this.rep = rep;
         this.masterService = masterService;
-        this.scheduleService = service;
-    }
+        this.scheduleService = scheduleService;
 
+    }
 
     @Override
     public MasterScheduleDto save(MasterScheduleDto masterScheduleDto) {
@@ -74,7 +75,5 @@ public class MasterScheduleServiceImpl implements MasterScheduleService {
         }
         return scheduleMap;
     }
-
-
 
 }

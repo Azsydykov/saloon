@@ -11,13 +11,14 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Properties;
 
 @Service
 public class EmailSenderServiceImpl implements EmailSenderService {
 
     @Override
-    public void emailSender(String email) throws IOException, MessagingException {
+    public void emailSender(String email,String saloonName, Date appointmentDate) throws IOException, MessagingException {
         final Properties properties = new Properties();
         properties.load(EmailSender.class.getClassLoader().getResourceAsStream("application.properties"));
 
@@ -26,7 +27,7 @@ public class EmailSenderServiceImpl implements EmailSenderService {
         message.setFrom(new InternetAddress("41mazkin"));
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
         message.setSubject("Hello");
-        message.setText("you have successfully registered");
+        message.setText("You have successfully registered at" + " " + saloonName + " salon by " + appointmentDate);
 
         Transport transport = mailSession.getTransport();
         transport.connect(null, "exfizyhheakjjqnh");

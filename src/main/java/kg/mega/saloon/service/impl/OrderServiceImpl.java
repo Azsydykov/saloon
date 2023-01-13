@@ -65,11 +65,12 @@ public class OrderServiceImpl implements OrderService {
         orderDto.setMaster(masterDto);
         orderDto.setAppointment_date(order.getAppointment_date());
 
+
         if (client.getName().isEmpty() | client.getPhoneNumber().isEmpty()) {
             throw new RuntimeException("Имя или номер телефона не может быть пустым!");
         }
         try {
-            emailSenderService.emailSender(orderDto.getClient().getEmail());
+            emailSenderService.emailSender(orderDto.getClient().getEmail(), orderDto.getMaster().getSaloon().getName(),orderDto.getAppointment_date());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (MessagingException e) {

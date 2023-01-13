@@ -21,7 +21,6 @@ public class MasterScheduleController {
     @PostMapping("/save")
     @ApiOperation("Сохранение")
     ResponseEntity<?> create(@RequestParam Long masterId, @RequestParam List<Long> scheduleIds) {
-
         try {
             return new ResponseEntity<>(service.create(masterId, scheduleIds), HttpStatus.CREATED);
         } catch (Exception e) {
