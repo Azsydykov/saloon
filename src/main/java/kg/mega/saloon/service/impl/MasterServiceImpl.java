@@ -51,7 +51,6 @@ public class MasterServiceImpl implements MasterService {
     @Override
     public MasterDto create(SaveMasterRequest master) {
         SaloonDto salon = saloonServ.findById(master.getSaloonId());
-
         MasterDto masterDto = new MasterDto();
         masterDto.setName(master.getName());
         masterDto.setSurname(master.getSurname());

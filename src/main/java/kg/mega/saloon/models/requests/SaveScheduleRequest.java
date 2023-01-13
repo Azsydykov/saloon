@@ -1,5 +1,6 @@
 package kg.mega.saloon.models.requests;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import kg.mega.saloon.enums.WorkDayEnum;
 import lombok.AccessLevel;
 import lombok.Getter;

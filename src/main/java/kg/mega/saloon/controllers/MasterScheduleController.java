@@ -2,6 +2,8 @@ package kg.mega.saloon.controllers;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import kg.mega.saloon.models.dto.MasterDto;
+import kg.mega.saloon.models.dto.MasterScheduleDto;
 import kg.mega.saloon.models.responses.ScheduleResponse;
 import kg.mega.saloon.service.MasterScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,22 @@ public class MasterScheduleController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
+    }
+
+    @GetMapping("/findById")
+    @ApiOperation("Поиск по id")
+    ResponseEntity<?> findById(@RequestParam Long id) {
+        try {
+            return new ResponseEntity<>(service.findById(id), HttpStatus.FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/findAll")
+    @ApiOperation("Вывод связей таблиц мастера и графика")
+    ResponseEntity<List<MasterScheduleDto>> findAll() {
+        return ResponseEntity.ok(service.findAll());
     }
 
 }
