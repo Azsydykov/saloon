@@ -8,6 +8,8 @@ import kg.mega.saloon.models.requests.SaveScheduleRequest;
 import kg.mega.saloon.models.responses.Response;
 import kg.mega.saloon.models.responses.ScheduleResponse;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +19,7 @@ public interface ScheduleService extends BaseService<ScheduleDto> {
     List<ScheduleDto> getScheduleByMasterName(String name);
     List<ScheduleDto> getScheduleByMasterId(Long id);
 
-    ScheduleDto create(SaveScheduleRequest scheduleResponse);
-
-    ScheduleDto create1(WorkDayEnum workDay, Date startTime, Date endTime);
+    ScheduleDto create(WorkDayEnum workDay, LocalTime startTime, LocalTime endTime);
 
 
 }

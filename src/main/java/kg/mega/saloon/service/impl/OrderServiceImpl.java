@@ -1,48 +1,51 @@
 package kg.mega.saloon.service.impl;
 
 import kg.mega.saloon.dao.OrderRep;
-import kg.mega.saloon.mappers.ClientMapper;
-import kg.mega.saloon.mappers.MasterMapper;
+import kg.mega.saloon.enums.OrderStatusEnum;
+import kg.mega.saloon.enums.WorkDayEnum;
+import kg.mega.saloon.exceptions.ExceptionHandler;
 import kg.mega.saloon.mappers.OrderMapper;
-import kg.mega.saloon.models.dto.ClientDto;
-import kg.mega.saloon.models.dto.MasterDto;
-import kg.mega.saloon.models.dto.OrderDto;
-import kg.mega.saloon.models.dto.SaloonDto;
+import kg.mega.saloon.models.dto.*;
+import kg.mega.saloon.models.requests.OrderRequest;
 import kg.mega.saloon.models.requests.SaveOrderRequest;
-import kg.mega.saloon.network.EmailSender;
-import kg.mega.saloon.service.ClientService;
-import kg.mega.saloon.service.EmailSenderService;
-import kg.mega.saloon.service.MasterService;
-import kg.mega.saloon.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import kg.mega.saloon.models.responses.Response;
+import kg.mega.saloon.service.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.*;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import javax.security.auth.login.AccountNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.List;
-import java.util.Properties;
 
 @Service
+
 @Transactional(propagation = Propagation.REQUIRED)
 public class OrderServiceImpl implements OrderService {
-    @Autowired
-    private OrderRep rep;
     OrderMapper mapper = OrderMapper.INSTANCE;
 
-    @Autowired
-    private ClientService clientService;
 
-    @Autowired
-    private MasterService masterService;
+    private final OrderRep rep;
+    private final ClientService clientService;
+    private final MasterService masterService;
+    private final EmailSenderService emailSenderService;
+    private final ScheduleService scheduleService;
 
-    @Autowired
-    private EmailSenderService emailSenderService;
+
+    public OrderServiceImpl(OrderRep rep, ClientService clientService, MasterService masterService, ScheduleService scheduleService, EmailSenderService emailSenderService) {
+        this.rep = rep;
+        this.clientService = clientService;
+        this.masterService = masterService;
+        this.emailSenderService = emailSenderService;
+        this.scheduleService = scheduleService;
+
+    }
 
 
     @Override
@@ -51,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto create(SaveOrderRequest order) {
+    public OrderDto create1(SaveOrderRequest order) {
 
         ClientDto client = new ClientDto();
         MasterDto masterDto = masterService.findById(order.getMasterId());
@@ -71,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Имя или номер телефона не может быть пустым!");
         }
         try {
-            emailSenderService.emailSender(orderDto.getClient().getEmail(), orderDto.getMaster().getSaloon().getName(),orderDto.getAppointment_date(), orderDto.getClient().getName());
+            emailSenderService.emailSender(orderDto.getClient().getEmail(), orderDto.getMaster().getSaloon().getName(), orderDto.getAppointment_date());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
@@ -98,4 +101,76 @@ public class OrderServiceImpl implements OrderService {
         return mapper.toDtos(rep.findAll());
     }
 
+    @Override
+    public Response create(OrderRequest order) {
+        //Найти клиента, если его нет, ошибка код 404  /done
+        //Найти мастера,если нет 404  /done
+        //Найти график мастера на этот appointmentDate  /done
+        //Найти день недели appointmentDate /done
+        //По дню недели найти график /done
+        //TODO add exc with 404 code  /done
+
+        ClientDto clientDto = clientService.findById(order.getClientId());
+
+
+        MasterDto masterDto = masterService.findById(order.getMasterId());
+
+        List<ScheduleDto> scheduleDtos = scheduleService.getScheduleByMasterId(masterDto.getId());
+
+        ScheduleDto scheduleDto = new ScheduleDto();  //не должны создавать новый график??????
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(order.getAppointmentDate());
+        WorkDayEnum workDayEnum = WorkDayEnum.getValue(calendar.get(Calendar.DAY_OF_WEEK));
+
+        for (ScheduleDto item : scheduleDtos) {
+            if (item.getWorkDay().equals(workDayEnum)) {
+                scheduleDto = item;
+                break;
+            } else {
+                throw new RuntimeException("В этот день мастер не работает!");
+            }
+        }
+        //проверка по графику мастера /done
+        //проверка на ордерс  /done
+
+        LocalTime startTime = scheduleDto.getStartTime();
+        LocalTime endTime = scheduleDto.getEndTime();
+
+        LocalTime appointmentTime = LocalDateTime.ofInstant(order.getAppointmentDate().toInstant(),
+                ZoneId.systemDefault()).toLocalTime();
+
+        if (appointmentTime.isAfter(startTime) & appointmentTime.isBefore(endTime)) {
+
+        } else {
+            throw new RuntimeException("Извините, но мастер не работает в это время!");
+        }
+        SimpleDateFormat sdm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        OrderDto orderDto = new OrderDto();
+        List<OrderDto> orderDtoList = findAll();
+
+        for (OrderDto item : orderDtoList) {
+            String adppDate=sdm.format(item.getAppointment_date());
+            String newAppDate=sdm.format(order.getAppointmentDate());
+
+            if (adppDate.equals(newAppDate)) {
+                throw new RuntimeException("Извините, на данное время клиент уже записан!");
+            } else continue;
+        }
+        orderDto.setMaster(masterDto);
+        orderDto.setClient(clientDto);
+        orderDto.setAppointment_date(order.getAppointmentDate());
+        orderDto.setStatus(OrderStatusEnum.CONFIRM);
+        save(orderDto);
+        try {
+            emailSenderService.emailSender(orderDto.getClient().getEmail(),
+                                           orderDto.getMaster().getSaloon().getName(),
+                                           orderDto.getAppointment_date());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+        return new Response("Registration completed successfully!");
+    }
 }

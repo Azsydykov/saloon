@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +30,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 
 
     @Override
-    public ScheduleDto save(ScheduleDto masterSchedule) {
-        return mapper.toDto(rep.save(mapper.toEntity(masterSchedule)));
+    public ScheduleDto save(ScheduleDto scheduleDto) {
+        return mapper.toDto(rep.save(mapper.toEntity(scheduleDto)));
     }
 
     @Override
@@ -58,22 +60,10 @@ public class ScheduleServiceImpl implements ScheduleService {
         return mapper.toDtos(rep.getScheduleByMasterId(id));
     }
 
-    @Override
-    public ScheduleDto create(SaveScheduleRequest scheduleResponse) {
-
-        ScheduleDto scheduleDto = new ScheduleDto();
-        scheduleDto.setWorkDay(scheduleResponse.getWorkDay());
-        scheduleDto.setStartTime(scheduleResponse.getStartTime());
-        scheduleDto.setEndTime(scheduleResponse.getEndTime());
-
-        return mapper.toDto(rep.save(mapper.toEntity(scheduleDto)));
-    }
 
     @Override
-    public ScheduleDto create1(WorkDayEnum workDay, Date startTime, Date endTime) {
-        SimpleDateFormat format = new SimpleDateFormat("hh:mm");
-        format.format(startTime);
-        format.format(endTime);
+    public ScheduleDto create(WorkDayEnum workDay, LocalTime startTime, LocalTime endTime) {
+
         ScheduleDto scheduleDto = new ScheduleDto();
         scheduleDto.setWorkDay(workDay);
         scheduleDto.setStartTime(startTime);

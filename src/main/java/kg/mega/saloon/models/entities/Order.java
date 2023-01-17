@@ -38,9 +38,15 @@ public class Order {
 
     @PrePersist
     protected void onCreate() {
-        status = OrderStatusEnum.CONFIRM;
+       // status = OrderStatusEnum.SUSPEND;
         addDate = new Date();
         updateDate = new Date();
         active = true;
     }
+
+    @PreUpdate
+    protected void onUpdate(){
+        updateDate = new Date();
+    }
+
 }
