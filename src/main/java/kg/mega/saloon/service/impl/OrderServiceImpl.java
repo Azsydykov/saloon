@@ -3,11 +3,12 @@ package kg.mega.saloon.service.impl;
 import kg.mega.saloon.dao.OrderRep;
 import kg.mega.saloon.enums.OrderStatusEnum;
 import kg.mega.saloon.enums.WorkDayEnum;
-import kg.mega.saloon.exceptions.ClientNotFoundException;
-import kg.mega.saloon.exceptions.ExceptionHandler;
 import kg.mega.saloon.exceptions.RegistrationException;
 import kg.mega.saloon.mappers.OrderMapper;
-import kg.mega.saloon.models.dto.*;
+import kg.mega.saloon.models.dto.ClientDto;
+import kg.mega.saloon.models.dto.MasterDto;
+import kg.mega.saloon.models.dto.OrderDto;
+import kg.mega.saloon.models.dto.ScheduleDto;
 import kg.mega.saloon.models.requests.OrderRequest;
 import kg.mega.saloon.models.requests.SaveOrderRequest;
 import kg.mega.saloon.models.responses.Response;
@@ -16,8 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.mail.*;
-import javax.security.auth.login.AccountNotFoundException;
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -32,7 +32,6 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
     OrderMapper mapper = OrderMapper.INSTANCE;
 
-
     private final OrderRep rep;
     private final ClientService clientService;
     private final MasterService masterService;
@@ -40,13 +39,13 @@ public class OrderServiceImpl implements OrderService {
     private final ScheduleService scheduleService;
 
 
-    public OrderServiceImpl(OrderRep rep, ClientService clientService, MasterService masterService, ScheduleService scheduleService, EmailSenderService emailSenderService) {
+    public OrderServiceImpl(OrderRep rep, ClientService clientService, MasterService masterService,
+                            ScheduleService scheduleService, EmailSenderService emailSenderService) {
         this.rep = rep;
         this.clientService = clientService;
         this.masterService = masterService;
         this.emailSenderService = emailSenderService;
         this.scheduleService = scheduleService;
-
     }
 
 
@@ -113,11 +112,8 @@ public class OrderServiceImpl implements OrderService {
         // add exc with 404 code  /done
 
         ClientDto clientDto = clientService.findById(order.getClientId());
-
         MasterDto masterDto = masterService.findById(order.getMasterId());
-
         List<ScheduleDto> scheduleDtos = scheduleService.getScheduleByMasterId(masterDto.getId());
-
         ScheduleDto scheduleDto = new ScheduleDto();  //не должны создавать новый график или можно??????
 
         Calendar calendar = Calendar.getInstance();
@@ -129,7 +125,7 @@ public class OrderServiceImpl implements OrderService {
                 scheduleDto = item;
                 break;
             } else {
-                throw new RuntimeException("В этот день мастер не работает!");
+                throw new RegistrationException("В этот день мастер не работает!");
             }
         }
         //проверка по графику мастера /done

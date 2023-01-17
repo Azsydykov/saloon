@@ -42,9 +42,7 @@ public class MasterController {
     @GetMapping("/findById")
     @ApiOperation("Поиск мастера по id")
     ResponseEntity<?> findById(@RequestParam Long id) {
-
             return new ResponseEntity<>(service.findById(id), HttpStatus.FOUND);
-
     }
 
     @GetMapping("/findAll")

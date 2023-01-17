@@ -5,7 +5,6 @@ import kg.mega.saloon.exceptions.ClientNotFoundException;
 import kg.mega.saloon.mappers.ClientMapper;
 import kg.mega.saloon.models.dto.ClientDto;
 import kg.mega.saloon.service.ClientService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +14,13 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS)
 public class ClientServiceImpl implements ClientService {
-
-    @Autowired
-    private ClientRep rep;
-
     ClientMapper mapper = ClientMapper.INSTANCE;
+
+    private final ClientRep rep;
+    public ClientServiceImpl(ClientRep rep) {
+        this.rep = rep;
+    }
+
 
     @Override
     public ClientDto save(ClientDto clientDto) {

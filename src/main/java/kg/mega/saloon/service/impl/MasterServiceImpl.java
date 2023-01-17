@@ -1,28 +1,28 @@
 package kg.mega.saloon.service.impl;
 
 import kg.mega.saloon.dao.MasterRep;
-import kg.mega.saloon.dao.SaloonRep;
 import kg.mega.saloon.exceptions.MasterNotFoundException;
 import kg.mega.saloon.mappers.MasterMapper;
 import kg.mega.saloon.models.dto.MasterDto;
 import kg.mega.saloon.models.dto.SaloonDto;
-import kg.mega.saloon.models.entities.Saloon;
 import kg.mega.saloon.models.requests.SaveMasterRequest;
 import kg.mega.saloon.service.MasterService;
 import kg.mega.saloon.service.SaloonService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class MasterServiceImpl implements MasterService {
-    @Autowired
-    private MasterRep rep;
-    @Autowired
-    private SaloonService saloonServ;
-
     MasterMapper mapper = MasterMapper.INSTANCE;
+
+    private final MasterRep rep;
+    private final SaloonService saloonServ;
+
+    public MasterServiceImpl(MasterRep rep, SaloonService saloonServ) {
+        this.rep = rep;
+        this.saloonServ = saloonServ;
+    }
 
 
     @Override
