@@ -1,6 +1,7 @@
 package kg.mega.saloon.service.impl;
 
 import kg.mega.saloon.dao.ClientRep;
+import kg.mega.saloon.exceptions.ClientNotFoundException;
 import kg.mega.saloon.mappers.ClientMapper;
 import kg.mega.saloon.models.dto.ClientDto;
 import kg.mega.saloon.service.ClientService;
@@ -27,7 +28,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ClientDto findById(Long id) {
-        return mapper.toDto(rep.findById(id).orElseThrow(() -> new RuntimeException("Клиент не найден!")));
+        return mapper.toDto(rep.findById(id).orElseThrow(() -> new ClientNotFoundException("Клиент не найден!")));
     }
 
     @Override

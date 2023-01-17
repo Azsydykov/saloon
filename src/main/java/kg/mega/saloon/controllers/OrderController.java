@@ -24,11 +24,11 @@ public class OrderController {
     @PostMapping("/create")
     @ApiOperation("Создание заявки")
     ResponseEntity<?> save(@RequestBody OrderRequest order) {
-        try {
+//        try {
             return new ResponseEntity<>(service.create(order), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+//        }
     }
 
     @PostMapping("/save")

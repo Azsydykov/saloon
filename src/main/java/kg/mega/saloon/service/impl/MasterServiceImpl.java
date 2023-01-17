@@ -2,6 +2,7 @@ package kg.mega.saloon.service.impl;
 
 import kg.mega.saloon.dao.MasterRep;
 import kg.mega.saloon.dao.SaloonRep;
+import kg.mega.saloon.exceptions.MasterNotFoundException;
 import kg.mega.saloon.mappers.MasterMapper;
 import kg.mega.saloon.models.dto.MasterDto;
 import kg.mega.saloon.models.dto.SaloonDto;
@@ -32,7 +33,7 @@ public class MasterServiceImpl implements MasterService {
 
     @Override
     public MasterDto findById(Long id) {
-        return mapper.toDto(rep.findById(id).orElseThrow(() -> new RuntimeException("Мастер не найден!")));
+        return mapper.toDto(rep.findById(id).orElseThrow(() -> new MasterNotFoundException("Мастер не найден!")));
     }
 
     @Override

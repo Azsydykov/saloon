@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 
 @ControllerAdvice
 public class ExceptionHandler {
+
     @org.springframework.web.bind.annotation.ExceptionHandler
     public ResponseEntity<?> handleException(ClientNotFoundException e){
         return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -16,5 +17,14 @@ public class ExceptionHandler {
         return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @org.springframework.web.bind.annotation.ExceptionHandler
+    public ResponseEntity<?> handleException(RegistrationException e){
+        return new ResponseEntity(e.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler
+    public ResponseEntity<?> handleException(EmailSenderException e){
+        return new ResponseEntity(e.getMessage(), HttpStatus.CONFLICT);
+    }
 
 }

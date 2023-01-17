@@ -3,7 +3,9 @@ package kg.mega.saloon.service.impl;
 import kg.mega.saloon.dao.OrderRep;
 import kg.mega.saloon.enums.OrderStatusEnum;
 import kg.mega.saloon.enums.WorkDayEnum;
+import kg.mega.saloon.exceptions.ClientNotFoundException;
 import kg.mega.saloon.exceptions.ExceptionHandler;
+import kg.mega.saloon.exceptions.RegistrationException;
 import kg.mega.saloon.mappers.OrderMapper;
 import kg.mega.saloon.models.dto.*;
 import kg.mega.saloon.models.requests.OrderRequest;
@@ -108,16 +110,15 @@ public class OrderServiceImpl implements OrderService {
         //Найти график мастера на этот appointmentDate  /done
         //Найти день недели appointmentDate /done
         //По дню недели найти график /done
-        //TODO add exc with 404 code  /done
+        // add exc with 404 code  /done
 
         ClientDto clientDto = clientService.findById(order.getClientId());
-
 
         MasterDto masterDto = masterService.findById(order.getMasterId());
 
         List<ScheduleDto> scheduleDtos = scheduleService.getScheduleByMasterId(masterDto.getId());
 
-        ScheduleDto scheduleDto = new ScheduleDto();  //не должны создавать новый график??????
+        ScheduleDto scheduleDto = new ScheduleDto();  //не должны создавать новый график или можно??????
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(order.getAppointmentDate());
@@ -143,18 +144,18 @@ public class OrderServiceImpl implements OrderService {
         if (appointmentTime.isAfter(startTime) & appointmentTime.isBefore(endTime)) {
 
         } else {
-            throw new RuntimeException("Извините, но мастер не работает в это время!");
+            throw new RegistrationException("Извините, но мастер не работает в это время!");
         }
         SimpleDateFormat sdm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         OrderDto orderDto = new OrderDto();
         List<OrderDto> orderDtoList = findAll();
 
         for (OrderDto item : orderDtoList) {
-            String adppDate=sdm.format(item.getAppointment_date());
-            String newAppDate=sdm.format(order.getAppointmentDate());
+            String adppDate = sdm.format(item.getAppointment_date());
+            String newAppDate = sdm.format(order.getAppointmentDate());
 
             if (adppDate.equals(newAppDate)) {
-                throw new RuntimeException("Извините, на данное время клиент уже записан!");
+                throw new RegistrationException("Извините, на данное время клиент уже записан!");
             } else continue;
         }
         orderDto.setMaster(masterDto);
