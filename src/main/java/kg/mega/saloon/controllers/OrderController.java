@@ -24,11 +24,8 @@ public class OrderController {
     @PostMapping("/create")
     @ApiOperation("Создание заявки")
     ResponseEntity<?> save(@RequestBody OrderRequest order) {
-//        try {
             return new ResponseEntity<>(service.create(order), HttpStatus.CREATED);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-//        }
+
     }
 
     @PostMapping("/save")
@@ -36,6 +33,16 @@ public class OrderController {
     ResponseEntity<?> save(@RequestBody OrderDto order) {
         try {
             return new ResponseEntity<>(service.save(order), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PostMapping("/confirm")
+    @ApiOperation("Подтверждение заявки")
+    ResponseEntity<?> confirm(@RequestParam int code,@RequestParam Long orderId ) {
+        try {
+            return new ResponseEntity<>(service.confirm(code,orderId), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -56,6 +63,16 @@ public class OrderController {
     ResponseEntity<?> findById(@RequestParam Long id) {
         try {
             return new ResponseEntity<>(service.findById(id), HttpStatus.FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/findByMasterId")
+    @ApiOperation("Поиск заявки по id мастера")
+    ResponseEntity<?> findByMasterId(@RequestParam Long id) {
+        try {
+            return new ResponseEntity<>(service.findOrderByMasterId(id), HttpStatus.FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }

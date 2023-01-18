@@ -24,13 +24,19 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 @Service
 
 @Transactional(propagation = Propagation.REQUIRED)
 public class OrderServiceImpl implements OrderService {
     OrderMapper mapper = OrderMapper.INSTANCE;
+    Random random = new Random();
+    int confirmCode = random.ints(10000, 99999).findFirst().getAsInt();
+
+    SimpleDateFormat sdm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private final OrderRep rep;
     private final ClientService clientService;
@@ -75,7 +81,9 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Имя или номер телефона не может быть пустым!");
         }
         try {
-            emailSenderService.emailSender(orderDto.getClient().getEmail(), orderDto.getMaster().getSaloon().getName(), orderDto.getAppointment_date());
+            emailSenderService.emailSender(orderDto.getClient().getEmail(),
+                    orderDto.getMaster().getSaloon().getName(),
+                    orderDto.getAppointment_date(),confirmCode );
         } catch (IOException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
@@ -114,7 +122,7 @@ public class OrderServiceImpl implements OrderService {
         ClientDto clientDto = clientService.findById(order.getClientId());
         MasterDto masterDto = masterService.findById(order.getMasterId());
         List<ScheduleDto> scheduleDtos = scheduleService.getScheduleByMasterId(masterDto.getId());
-        ScheduleDto scheduleDto = new ScheduleDto();  //не должны создавать новый график или можно??????
+        ScheduleDto scheduleDto = null;
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(order.getAppointmentDate());
@@ -124,10 +132,11 @@ public class OrderServiceImpl implements OrderService {
             if (item.getWorkDay().equals(workDayEnum)) {
                 scheduleDto = item;
                 break;
-            } else {
-                throw new RegistrationException("В этот день мастер не работает!");
             }
         }
+        if (scheduleDto==null){
+                throw new RuntimeException("В этот день мастер не работает!");
+            }
         //проверка по графику мастера /done
         //проверка на ордерс  /done
 
@@ -137,16 +146,16 @@ public class OrderServiceImpl implements OrderService {
         LocalTime appointmentTime = LocalDateTime.ofInstant(order.getAppointmentDate().toInstant(),
                 ZoneId.systemDefault()).toLocalTime();
 
-        if (appointmentTime.isAfter(startTime) & appointmentTime.isBefore(endTime)) {
+        if (!(appointmentTime.isAfter(startTime) & appointmentTime.isBefore(endTime))) {
 
-        } else {
             throw new RegistrationException("Извините, но мастер не работает в это время!");
         }
-        SimpleDateFormat sdm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
         OrderDto orderDto = new OrderDto();
-        List<OrderDto> orderDtoList = findAll();
+        List<OrderDto> orderDtoList = findOrderByMasterId(masterDto.getId()); //ищим у графика мастера
 
         for (OrderDto item : orderDtoList) {
+            //проверка на статус если delete пропускаем, confirm  извините на данное время клиент уже записан попробуйте позже
             String adppDate = sdm.format(item.getAppointment_date());
             String newAppDate = sdm.format(order.getAppointmentDate());
 
@@ -157,17 +166,56 @@ public class OrderServiceImpl implements OrderService {
         orderDto.setMaster(masterDto);
         orderDto.setClient(clientDto);
         orderDto.setAppointment_date(order.getAppointmentDate());
-        orderDto.setStatus(OrderStatusEnum.CONFIRM);
         save(orderDto);
         try {
+            //отправить random код
             emailSenderService.emailSender(orderDto.getClient().getEmail(),
                                            orderDto.getMaster().getSaloon().getName(),
-                                           orderDto.getAppointment_date());
+                                           orderDto.getAppointment_date(),
+                                           confirmCode);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
             e.printStackTrace();
         }
         return new Response("Registration completed successfully!");
+    }
+
+    @Override
+    public Object confirm(int code, Long orderId) {
+        OrderDto orderDto = findById(orderId);
+        if (confirmCode!=code) {
+            throw new RegistrationException("Неверный код подтверждения, прошу повторить!");
+        } else
+            if (checkDate(orderDto.getUpdateDate())){
+                orderDto.setStatus(OrderStatusEnum.CANCELED);
+                save(orderDto);
+                throw new RegistrationException("Прошел час, регистрация не подтверждена!");
+            }else orderDto.setStatus(OrderStatusEnum.CONFIRM);
+            save(orderDto);
+
+        //проверка на код, если не верный то ошибку  /done
+        //добавить проверку на время, если прошел час обработать ошибкой, если нет то идём дальше /done
+        //переводим заявку в статус confirm //done
+        return new Response("Успешное подтверждение кода");
+    }
+
+    @Override
+    public void checkSuspendOrders() {
+        //вытащить все заявки со статусом suspend
+        //если прошёл час то переводим в статус CANCELED
+        System.out.println("Jobs working");
+    }
+
+    @Override
+    public List<OrderDto> findOrderByMasterId(Long id) {
+        return mapper.toDtos(rep.getOrderByMasterId(id));
+    }
+
+    private boolean checkDate(Date updateDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(updateDate);
+        calendar.add(Calendar.HOUR,1);
+        return new Date().after(calendar.getTime());
     }
 }
