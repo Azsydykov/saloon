@@ -2,6 +2,7 @@ package kg.mega.saloon.controllers;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import kg.mega.saloon.enums.OrderStatusEnum;
 import kg.mega.saloon.models.dto.OrderDto;
 import kg.mega.saloon.models.requests.OrderRequest;
 import kg.mega.saloon.models.requests.SaveOrderRequest;
@@ -82,6 +83,12 @@ public class OrderController {
     @ApiOperation("Вывод всех заявок")
     ResponseEntity<List<OrderDto>> findAll() {
         return ResponseEntity.ok(service.findAll());
+    }
+
+    @GetMapping("/getOrderByStatus")
+    @ApiOperation("Вывод заявок по статусу")
+    ResponseEntity<List<OrderDto>> getOrderByStatus(@RequestParam String status) {
+        return ResponseEntity.ok(service.getOrderByStatus(status));
     }
 
     @DeleteMapping("/delete")

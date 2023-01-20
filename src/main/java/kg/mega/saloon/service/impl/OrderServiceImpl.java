@@ -36,7 +36,7 @@ public class OrderServiceImpl implements OrderService {
     Random random = new Random();
     int confirmCode = random.ints(10000, 99999).findFirst().getAsInt();
 
-    SimpleDateFormat sdm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private final OrderRep rep;
     private final ClientService clientService;
@@ -83,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
         try {
             emailSenderService.emailSender(orderDto.getClient().getEmail(),
                     orderDto.getMaster().getSaloon().getName(),
-                    orderDto.getAppointment_date(),confirmCode );
+                    orderDto.getAppointment_date(), confirmCode);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
@@ -134,9 +134,9 @@ public class OrderServiceImpl implements OrderService {
                 break;
             }
         }
-        if (scheduleDto==null){
-                throw new RuntimeException("В этот день мастер не работает!");
-            }
+        if (scheduleDto == null) {
+            throw new RuntimeException("В этот день мастер не работает!");
+        }
         //проверка по графику мастера /done
         //проверка на ордерс  /done
 
@@ -152,27 +152,39 @@ public class OrderServiceImpl implements OrderService {
         }
 
         OrderDto orderDto = new OrderDto();
-        List<OrderDto> orderDtoList = findOrderByMasterId(masterDto.getId()); //ищим у графика мастера
+        List<OrderDto> orderDtoList = findOrderByMasterId(masterDto.getId()); //ищим у графика мастера  /done
+
+        //проверка на статус если canseled можно записывать  //done
+        // если suspend проверяем на час если не прошёл ->извините на данное время клиент уже записан попробуйте позже  //done
+        //                               если прошёл час тогда можем сохранять с изменение статуса прошлой заявки на canseled  //done
 
         for (OrderDto item : orderDtoList) {
-            //проверка на статус если delete пропускаем, confirm  извините на данное время клиент уже записан попробуйте позже
-            String adppDate = sdm.format(item.getAppointment_date());
-            String newAppDate = sdm.format(order.getAppointmentDate());
 
-            if (adppDate.equals(newAppDate)) {
-                throw new RegistrationException("Извините, на данное время клиент уже записан!");
-            } else continue;
+            String appointmentDate = sdf.format(item.getAppointment_date());
+            String newAppointmentDate = sdf.format(order.getAppointmentDate());
+
+            if (appointmentDate.equals(newAppointmentDate)) {
+                if(item.getStatus().equals(OrderStatusEnum.CONFIRM)){
+                    throw new RegistrationException("Извините, на данное время клиент уже записан!");
+                }
+                else if (item.getStatus().equals(OrderStatusEnum.SUSPEND)){
+                      if(!(checkDate(item.getUpdateDate()))) {
+                        throw new RegistrationException("Извините, на данное время клиент уже записан, попробуйте позже!");
+                    }else item.setStatus(OrderStatusEnum.CANCELED);
+                          save(item);
+                }
+            }else continue;
         }
         orderDto.setMaster(masterDto);
         orderDto.setClient(clientDto);
         orderDto.setAppointment_date(order.getAppointmentDate());
         save(orderDto);
+
         try {
-            //отправить random код
             emailSenderService.emailSender(orderDto.getClient().getEmail(),
-                                           orderDto.getMaster().getSaloon().getName(),
-                                           orderDto.getAppointment_date(),
-                                           confirmCode);
+                    orderDto.getMaster().getSaloon().getName(),
+                    orderDto.getAppointment_date(),
+                    confirmCode); //отправляем рандомный код для подтверждения
         } catch (IOException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
@@ -181,31 +193,42 @@ public class OrderServiceImpl implements OrderService {
         return new Response("Registration completed successfully!");
     }
 
+
     @Override
     public Object confirm(int code, Long orderId) {
-        OrderDto orderDto = findById(orderId);
-        if (confirmCode!=code) {
-            throw new RegistrationException("Неверный код подтверждения, прошу повторить!");
-        } else
-            if (checkDate(orderDto.getUpdateDate())){
-                orderDto.setStatus(OrderStatusEnum.CANCELED);
-                save(orderDto);
-                throw new RegistrationException("Прошел час, регистрация не подтверждена!");
-            }else orderDto.setStatus(OrderStatusEnum.CONFIRM);
-            save(orderDto);
-
         //проверка на код, если не верный то ошибку  /done
         //добавить проверку на время, если прошел час обработать ошибкой, если нет то идём дальше /done
         //переводим заявку в статус confirm //done
+
+        OrderDto orderDto = findById(orderId);
+        if (confirmCode != code) {
+            throw new RegistrationException("Неверный код подтверждения, прошу повторить!");
+        } else if (checkDate(orderDto.getUpdateDate())) {
+            orderDto.setStatus(OrderStatusEnum.CANCELED);
+            save(orderDto);
+            throw new RegistrationException("Прошел час, регистрация не подтверждена!");
+        } else orderDto.setStatus(OrderStatusEnum.CONFIRM);
+        save(orderDto);
         return new Response("Успешное подтверждение кода");
     }
 
+
     @Override
     public void checkSuspendOrders() {
-        //вытащить все заявки со статусом suspend
-        //если прошёл час то переводим в статус CANCELED
-        System.out.println("Jobs working");
+        //вытащить все заявки со статусом suspend  /done
+        //если прошёл час то переводим в статус CANCELED  /done
+
+        List<OrderDto> orderDtos = findAll();
+        for (OrderDto item : orderDtos) {
+            if (item.getStatus().equals(OrderStatusEnum.SUSPEND)) {
+                if (checkDate(item.getUpdateDate())) {
+                    item.setStatus(OrderStatusEnum.CANCELED);
+                    save(item);
+                }
+            }
+        }
     }
+
 
     @Override
     public List<OrderDto> findOrderByMasterId(Long id) {
@@ -215,7 +238,12 @@ public class OrderServiceImpl implements OrderService {
     private boolean checkDate(Date updateDate) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(updateDate);
-        calendar.add(Calendar.HOUR,1);
+        calendar.add(Calendar.HOUR, 1);
         return new Date().after(calendar.getTime());
+    }
+
+    @Override
+    public List<OrderDto> getOrderByStatus(String status) {
+        return mapper.toDtos(rep.getOrderByStatus(status));
     }
 }

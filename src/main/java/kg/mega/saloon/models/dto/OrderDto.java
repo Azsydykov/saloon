@@ -18,7 +18,9 @@ public class OrderDto {
     Date updateDate;
     Date appointment_date;
     OrderStatusEnum status;
+    @JsonIgnore
     ClientDto client;
+    @JsonIgnore
     MasterDto master;
     @JsonIgnore
     boolean active;

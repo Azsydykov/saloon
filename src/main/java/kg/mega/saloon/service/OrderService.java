@@ -1,5 +1,6 @@
 package kg.mega.saloon.service;
 
+import kg.mega.saloon.enums.OrderStatusEnum;
 import kg.mega.saloon.models.dto.OrderDto;
 import kg.mega.saloon.models.requests.OrderRequest;
 import kg.mega.saloon.models.requests.SaveOrderRequest;
@@ -16,4 +17,5 @@ public interface OrderService extends BaseService<OrderDto>{
     void checkSuspendOrders();
 
    List<OrderDto> findOrderByMasterId(Long id);
+   List<OrderDto> getOrderByStatus(String status);
 }
