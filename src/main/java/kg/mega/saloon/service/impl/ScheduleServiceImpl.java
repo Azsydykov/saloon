@@ -2,6 +2,7 @@ package kg.mega.saloon.service.impl;
 
 import kg.mega.saloon.dao.ScheduleRep;
 import kg.mega.saloon.enums.WorkDayEnum;
+import kg.mega.saloon.exceptions.ScheduleNotFoundException;
 import kg.mega.saloon.mappers.ScheduleMapper;
 import kg.mega.saloon.models.dto.MasterDto;
 import kg.mega.saloon.models.dto.SaloonDto;
@@ -36,7 +37,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public ScheduleDto findById(Long id) {
-        return mapper.toDto(rep.findById(id).orElseThrow(()->new RuntimeException("График мастера не найден!")));
+        return mapper.toDto(rep.findById(id).orElseThrow(()->new ScheduleNotFoundException("График мастера не найден!")));
     }
 
     @Override

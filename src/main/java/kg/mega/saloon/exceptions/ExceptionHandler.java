@@ -19,7 +19,17 @@ public class ExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler
     public ResponseEntity<?> handleException(RegistrationException e){
-        return new ResponseEntity(e.getMessage(), HttpStatus.CONFLICT);
+        return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler
+    public ResponseEntity<?> handleException(SalonNotFoundException e){
+        return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler
+    public ResponseEntity<?> handleException(ScheduleNotFoundException e){
+        return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
 }

@@ -1,6 +1,7 @@
 package kg.mega.saloon.service.impl;
 
 import kg.mega.saloon.dao.SaloonRep;
+import kg.mega.saloon.exceptions.SalonNotFoundException;
 import kg.mega.saloon.mappers.SaloonMapper;
 import kg.mega.saloon.models.dto.SaloonDto;
 import kg.mega.saloon.service.SaloonService;
@@ -26,7 +27,7 @@ public class SaloonServiceImpl implements SaloonService {
 
     @Override
     public SaloonDto findById(Long id) {
-        return mapper.toDto(rep.findById(id).orElseThrow(()-> new RuntimeException("Салон не найден!")));
+        return mapper.toDto(rep.findById(id).orElseThrow(()-> new SalonNotFoundException("Салон не найден!")));
     }
 
     @Override
