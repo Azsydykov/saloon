@@ -10,7 +10,6 @@ import kg.mega.saloon.models.dto.MasterDto;
 import kg.mega.saloon.models.dto.OrderDto;
 import kg.mega.saloon.models.dto.ScheduleDto;
 import kg.mega.saloon.models.requests.OrderRequest;
-import kg.mega.saloon.models.requests.SaveOrderRequest;
 import kg.mega.saloon.models.responses.Response;
 import kg.mega.saloon.service.*;
 import org.springframework.stereotype.Service;
@@ -60,38 +59,7 @@ public class OrderServiceImpl implements OrderService {
         return mapper.toDto(rep.save(mapper.toEntity(order)));
     }
 
-    @Override
-    public OrderDto create1(SaveOrderRequest order) {
 
-        ClientDto client = new ClientDto();
-        MasterDto masterDto = masterService.findById(order.getMasterId());
-        OrderDto orderDto = new OrderDto();
-        client.setName(order.getClientDto().getName());
-        client.setSurname(order.getClientDto().getSurname());
-        client.setPhoneNumber(order.getClientDto().getPhoneNumber());
-        client.setEmail(order.getClientDto().getEmail());
-
-        client = clientService.save(order.getClientDto());
-        orderDto.setClient(client);
-        orderDto.setMaster(masterDto);
-        orderDto.setAppointment_date(order.getAppointment_date());
-
-
-        if (client.getName().isEmpty() | client.getPhoneNumber().isEmpty()) {
-            throw new RuntimeException("Имя или номер телефона не может быть пустым!");
-        }
-        try {
-            emailSenderService.emailSender(orderDto.getClient().getEmail(),
-                    orderDto.getMaster().getSaloon().getName(),
-                    orderDto.getAppointment_date(), confirmCode);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-
-        return save(orderDto);
-    }
 
     @Override
     public OrderDto findById(Long id) {
@@ -135,7 +103,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         if (scheduleDto == null) {
-            throw new RuntimeException("В этот день мастер не работает!");
+            throw new RegistrationException("В этот день мастер не работает!");
         }
         //проверка по графику мастера /done
         //проверка на ордерс  /done

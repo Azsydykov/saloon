@@ -55,7 +55,7 @@ public class MasterScheduleServiceImpl implements MasterScheduleService {
 
     @Override
     public Response create(Long masterId, List<Long> scheduleIds) {
-        MasterDto masterDto = masterService.findById(masterId);
+        MasterDto masterDto = masterService.findById(masterId);;
 
         for (Long id : scheduleIds) {
             ScheduleDto scheduleDto = scheduleService.findById(id);

@@ -26,7 +26,6 @@ public class OrderController {
     @ApiOperation("Создание заявки")
     ResponseEntity<?> save(@RequestBody OrderRequest order) {
             return new ResponseEntity<>(service.create(order), HttpStatus.CREATED);
-
     }
 
     @PostMapping("/save")
@@ -44,16 +43,6 @@ public class OrderController {
     ResponseEntity<?> confirm(@RequestParam int code,@RequestParam Long orderId ) {
         try {
             return new ResponseEntity<>(service.confirm(code,orderId), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
-
-    @PostMapping("/create1")
-    @ApiOperation("Создать заявку")
-    ResponseEntity<?>create1(@RequestBody SaveOrderRequest orderRequest){
-        try {
-            return new ResponseEntity<>(service.create1(orderRequest), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
